@@ -16,7 +16,7 @@ from os.path import expanduser
 from oauth2client.service_account import ServiceAccountCredentials
 
 ## Update the following line to the location of your inventory configuration file.
-configFile = "inventory_data.cfg"
+configFile = "~/tmp/inventory_data.cfg"
 ##
 
 configFile = expanduser(configFile)
@@ -92,20 +92,22 @@ if getlist:
         if outputType == "hostname":
             hosts = []
             response = request.execute()
-            for instance in response['items']:
-                hosts.append(instance['name'])
+            if 'items' in response:
+                for instance in response['items']:
+                    hosts.append(instance['name'])
     
             allGroups.update({ groupName : { "hosts" : hosts, "vars" : {} }} )
     
         elif outputType == "ipaddress":
             hosts = []
             response = request.execute()
-            for instance in response['items']:
-                if instance['status'] != 'TERMINATED':
-                   for item in instance['networkInterfaces']:
-                       for access in item['accessConfigs']:
-                          if 'natIP' in access:
-                            hosts.append(access['natIP'])
+            if 'items' in response:
+                for instance in response['items']:
+                    if instance['status'] != 'TERMINATED':
+                       for item in instance['networkInterfaces']:
+                           for access in item['accessConfigs']:
+                              if 'natIP' in access:
+                                hosts.append(access['natIP'])
             allGroups.update({ groupName : { "hosts" : hosts, "vars" : {} }} )
     
     
