@@ -11,21 +11,23 @@ import sys
 import json
 import optparse
 import ConfigParser
+from os.path import expanduser
 
 from oauth2client.service_account import ServiceAccountCredentials
 
+## Update the following line to the location of your inventory configuration file.
+configFile = "~/tmp/inventory_data.cfg"
 ##
-configFile = "inventory_data.cfg"
+
+configFile = expanduser(configFile)
 
 def readGceConfig(gceConfigFile, nodeName):
     """ Reads node configuration file, returns dictionary. """ 
 
     import ConfigParser
     import sys
-    import os.path
 
     config = ConfigParser.RawConfigParser()
-    gceConfigFile = os.path.expanduser(gceConfigFile)
     
     gceConfig={}
     try:
