@@ -23,15 +23,15 @@ pip install google-api-python-client
 You'll need to configure the inventory_data.cfg file with the following:
 
 ```
-[Config]
-Project = rstudio-1052
+[Project1]
+Project = rstudio-1234
 Scopes = https://www.googleapis.com/auth/compute.readonly
 Secret = /home/kwan/.ssh/RStudio-0123434c25bc7.json
 Zone = us-east1-b
 Output = hostname
 
-[IPAddress]
-Project = rstudio-1052
+[Project2]
+Project = tensorflow-1234
 Scopes = https://www.googleapis.com/auth/compute.readonly
 Secret = /home/kwan/.ssh/RStudio-40de34c25bc7.json
 Zone = us-east1-b
@@ -51,7 +51,9 @@ The usage is simple:
 Once the inventory file is configured you can test with:
 ```
 (gce_venv) [kwan@infinity gceBuildServer]$ ./gce_inventory.py --list
-{"rstudio-1052": {"hosts": ["35.190.130.202", "35.185.107.33"], "vars": {}}}
+{"Project1": {"hosts": ["35.190.130.202", "35.185.107.33"], "vars": {}}, 
+ "Project2": {"hosts": ["kll-tester-003", "kll-tester-004"], "vars": {}}
+}
 
 (gce_venv) [kwan@infinity gceBuildServer]$ ./gce_inventory.py --host doesntmatter
 {}
@@ -66,18 +68,12 @@ ansible rstudio-2345 -i ./gce_inventory.py -a "hostname"
 
 If all works well, you should see something like:
 ```
-(gce_venv) [kwan@infinity gceBuildServer]$ ansible rstudio-2345 -i ./gce_inventory.py -a "hostname"
+(gce_venv) [kwan@infinity gceBuildServer]$ ansible Project1 -i ./gce_inventory.py -a "hostname"
 35.190.130.202 | SUCCESS | rc=0 >>
 kll-tester-003
 
 35.185.107.33 | SUCCESS | rc=0 >>
 kll-tester-004
 ```
-That's it. If I can get around to it I'll modify it to iterate through the configuration file
-and pull all the headings into separate groups.
-```
-{"project1": {"hosts": ["35.190.130.201", "35.185.17.33"], "vars": {}},
- "project2": {"hosts": ["35.190.130.202", "35.185.17.34"], "vars": {}},
- "project3": {"hosts": ["35.190.130.203", "35.185.17.35"], "vars": {}}}
-```
+
 
