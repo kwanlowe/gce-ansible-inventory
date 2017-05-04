@@ -1,0 +1,13 @@
+[Config]
+Project = project1-1235
+Scopes = https://www.googleapis.com/auth/compute.readonly 
+Secret = /home/kwan/.ssh/Project1-44325ef25bc7.json
+Zone = us-east1-b
+Output = ipaddress
+
+[IPAddress]
+Project = project2-2842
+Scopes = https://www.googleapis.com/auth/compute.readonly 
+Secret = /home/kwan/.ssh/Project2-47283k6ea010.json
+Zone = us-east1-b
+Output = ipaddress
