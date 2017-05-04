@@ -16,7 +16,7 @@ from os.path import expanduser
 from oauth2client.service_account import ServiceAccountCredentials
 
 ## Update the following line to the location of your inventory configuration file.
-configFile = "~/tmp/inventory_data.cfg"
+configFile = "inventory_data.cfg"
 ##
 
 configFile = expanduser(configFile)
@@ -60,6 +60,10 @@ parser.add_option( '--list', action="store_true", dest="invlist", help="List inv
 parser.add_option( '--host', action="store", dest="hostname", help="Return host list")
 options, args = parser.parse_args()
 
+if (options.invlist == None) and (options.hostname == None) :
+    parser.error("Options missing. Check usage with -h.")
+    sys.exit(1)
+
 node = options.hostname
 getlist = options.invlist
 
@@ -70,51 +74,51 @@ config.read(configFile)
 sections =  config.sections()
 
 allGroups = {} 
-for groupName in  sections:
-    ### FUTURE: Can we pass configParser object instead
-    ###         of reading the configFile anew each iteration?
-    gceConfig = readGceConfig(configFile, groupName)
-
-    outputType = gceConfig["gceOutput"]
-    myscopes = [gceConfig["gceScopes"]]
-    project = gceConfig["gceProject"]
-    zone = gceConfig["gceZone"]
-
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(gceConfig["gceSecret"], scopes=myscopes)
-    service = discovery.build('compute', 'v1', credentials=credentials)
-    request = service.instances().list(project=project, zone=zone)
-
-    if outputType == "hostname":
-        hosts = []
-        response = request.execute()
-        for instance in response['items']:
-            hosts.append(instance['name'])
-
-        allGroups.update({ groupName : { "hosts" : hosts, "vars" : {} }} )
-
-    elif outputType == "ipaddress":
-        hosts = []
-        response = request.execute()
-        for instance in response['items']:
-            if instance['status'] != 'TERMINATED':
-               for item in instance['networkInterfaces']:
-                   for access in item['accessConfigs']:
-                      if 'natIP' in access:
-                        hosts.append(access['natIP'])
-        allGroups.update({ groupName : { "hosts" : hosts, "vars" : {} }} )
-
-
-    else:
-        print "Invalid Output type in config."
-        print "Please select 'hostname' or 'ipaddress'."
-        sys.exit(1)
-
-
 if getlist:
+    for groupName in  sections:
+        ### FUTURE: Can we pass configParser object instead
+        ###         of reading the configFile anew each iteration?
+        gceConfig = readGceConfig(configFile, groupName)
+    
+        outputType = gceConfig["gceOutput"]
+        myscopes = [gceConfig["gceScopes"]]
+        project = gceConfig["gceProject"]
+        zone = gceConfig["gceZone"]
+    
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(gceConfig["gceSecret"], scopes=myscopes)
+        service = discovery.build('compute', 'v1', credentials=credentials)
+        request = service.instances().list(project=project, zone=zone)
+    
+        if outputType == "hostname":
+            hosts = []
+            response = request.execute()
+            for instance in response['items']:
+                hosts.append(instance['name'])
+    
+            allGroups.update({ groupName : { "hosts" : hosts, "vars" : {} }} )
+    
+        elif outputType == "ipaddress":
+            hosts = []
+            response = request.execute()
+            for instance in response['items']:
+                if instance['status'] != 'TERMINATED':
+                   for item in instance['networkInterfaces']:
+                       for access in item['accessConfigs']:
+                          if 'natIP' in access:
+                            hosts.append(access['natIP'])
+            allGroups.update({ groupName : { "hosts" : hosts, "vars" : {} }} )
+    
+    
+        else:
+            print "Invalid Output type in config."
+            print "Please select 'hostname' or 'ipaddress'."
+            sys.exit(1)
+
+
     print json.dumps(allGroups)
 elif len(node) != 0:
     ### Output an empty list.D.. 
     ### Perhaps project metadata could go here...
-    print json.dumps(gceList[gceConfig["gceProject"]]["vars"])
+    print json.dumps({}) 
 
 
