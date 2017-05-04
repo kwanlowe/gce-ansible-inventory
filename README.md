@@ -41,6 +41,17 @@ Output = ipaddress
 All these fields should be self-explanatory.  The "Output" field just selects either
 the hostname or the IP address to print.
 
+### Edit script to place the configuration file ###
+By default it looks in the current directory but can be modified to a different location such
+as some path in your Ansible tree (or out of it).
+
+```
+vi gce_inventory.py
+
+configFile = "~/src/ansible/inventory_data.cfg"
+```
+
+
 
 ## Usage ##
 The usage is simple:
